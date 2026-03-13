@@ -70,7 +70,6 @@
     z-index: 0;
   }
 
-  /* Spotlight beams */
   .beams {
     position: absolute;
     inset: 0;
@@ -146,6 +145,7 @@
   .btn-primary {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.6rem;
     background: var(--red);
     color: var(--white);
@@ -160,10 +160,14 @@
     transition: background 0.2s, transform 0.15s;
     text-decoration: none;
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    /* Better touch target on mobile */
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   .btn-primary:hover { background: var(--red-dim); transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary svg { width: 16px; height: 16px; }
+  .btn-primary:active { transform: translateY(0); background: var(--red-dim); }
+  .btn-primary svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   .scroll-hint {
     position: absolute;
@@ -211,7 +215,6 @@
     margin-bottom: 1.5rem;
   }
 
-  /* ── DIVIDER ── */
   .divider {
     border: none;
     border-top: 1px solid var(--border);
@@ -226,6 +229,9 @@
     border: 1px solid var(--border);
     padding: 2.5rem 2rem;
     position: relative;
+  }
+  @media (max-width: 480px) {
+    .form-card { padding: 1.5rem 1rem; }
   }
   .form-card::before {
     content: '';
@@ -265,14 +271,16 @@
     border: 1px solid var(--border);
     color: var(--white);
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 1rem; /* bumped up from 0.95 — prevents iOS zoom on focus */
     font-weight: 300;
-    padding: 0.8rem 1rem;
+    padding: 0.9rem 1rem;
     outline: none;
     transition: border-color 0.2s;
     -webkit-appearance: none;
     appearance: none;
     border-radius: 0;
+    /* Better mobile tap feel */
+    -webkit-tap-highlight-color: transparent;
   }
   input:focus, select:focus, textarea:focus { border-color: var(--red); }
   input::placeholder, textarea::placeholder { color: var(--muted); }
@@ -291,10 +299,20 @@
     cursor: pointer;
     transition: border-color 0.2s, background 0.2s;
     position: relative;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  /* Bigger tap area on mobile */
+  @media (max-width: 600px) {
+    .drop-zone { padding: 3rem 1.5rem; }
   }
   .drop-zone:hover, .drop-zone.drag-over {
     border-color: var(--red);
     background: rgba(232,41,28,0.04);
+  }
+  .drop-zone:active {
+    background: rgba(232,41,28,0.06);
+    border-color: var(--red);
   }
   .drop-zone input[type="file"] {
     position: absolute;
@@ -318,6 +336,15 @@
     line-height: 1.6;
   }
   .drop-label strong { color: var(--text); font-weight: 400; }
+
+  /* Mobile-specific label — hide/show based on screen */
+  .drop-label-desktop { display: block; }
+  .drop-label-mobile { display: none; }
+  @media (max-width: 600px) {
+    .drop-label-desktop { display: none; }
+    .drop-label-mobile { display: block; }
+  }
+
   .file-types {
     font-size: 0.7rem;
     color: #3e3a36;
@@ -337,9 +364,27 @@
   }
   .file-chosen.visible { display: flex; }
   .file-chosen-icon { color: var(--red); flex-shrink: 0; }
-  .file-chosen-name { font-size: 0.85rem; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .file-chosen-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 0; }
+  .file-chosen-info { flex: 1; min-width: 0; }
+  .file-chosen-name { font-size: 0.85rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .file-chosen-size { font-size: 0.72rem; color: var(--muted); margin-top: 0.15rem; display: block; }
+  .file-chosen-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 0.5rem; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
   .file-chosen-remove:hover { color: var(--red); }
+
+  /* ── FILE SIZE WARNING ── */
+  .size-warning {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(245,166,35,0.07);
+    border: 1px solid rgba(245,166,35,0.25);
+    border-left: 3px solid var(--amber);
+    padding: 0.75rem 1rem;
+    margin-top: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--amber);
+    line-height: 1.5;
+  }
+  .size-warning.visible { display: flex; }
 
   /* ── PROGRESS BAR ── */
   .progress-wrap {
@@ -376,10 +421,10 @@
     margin: 1.5rem 0;
   }
   .consent-wrap input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
-    margin-top: 3px;
+    margin-top: 1px;
     accent-color: var(--red);
     cursor: pointer;
   }
@@ -389,6 +434,36 @@
     line-height: 1.6;
   }
   .consent-text a { color: var(--text); text-underline-offset: 3px; }
+
+  /* ── SUBMIT BUTTON — sticky on mobile ── */
+  .submit-row {
+    margin-top: 1.5rem;
+  }
+  .submit-row .btn-primary {
+    width: 100%;
+  }
+
+  @media (max-width: 600px) {
+    .sticky-submit-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(transparent, rgba(8,8,8,0.98) 30%);
+      z-index: 100;
+      display: none; /* shown via JS when form is in view */
+    }
+    .sticky-submit-bar.visible { display: block; }
+    .sticky-submit-bar .btn-primary {
+      width: 100%;
+      font-size: 1rem;
+      padding: 1rem;
+      min-height: 56px;
+    }
+    /* Add padding so sticky bar doesn't cover content */
+    #upload { padding-bottom: 6rem; }
+  }
 
   /* ── THANK YOU STATE ── */
   .thank-you {
@@ -428,9 +503,11 @@
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    padding: 0.6rem 1.2rem;
+    padding: 0.8rem 1.2rem;
     text-decoration: none;
     transition: border-color 0.2s, color 0.2s;
+    min-height: 48px;
+    -webkit-tap-highlight-color: transparent;
   }
   .social-link:hover { border-color: var(--red); color: var(--red); }
 
@@ -493,11 +570,11 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     transition: color 0.2s;
+    padding: 0.5rem 0; /* better tap target */
   }
   .footer-links a:hover { color: var(--text); }
   .footer-copy { font-size: 0.72rem; color: #3e3a36; width: 100%; }
 
-  /* ── ANIMATIONS ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
@@ -541,15 +618,17 @@
   .modal p:last-child { margin-bottom: 0; }
   .modal-close {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 0.75rem;
+    right: 0.75rem;
     background: none;
     border: none;
     color: var(--muted);
     cursor: pointer;
     font-size: 1.4rem;
     line-height: 1;
+    padding: 0.5rem;
     transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
   }
   .modal-close:hover { color: var(--white); }
 
@@ -576,7 +655,6 @@
     gap: 0.6rem;
     align-items: flex-start;
   }
-
 </style>
 </head>
 <body>
@@ -622,56 +700,45 @@
 
         <!-- Drop Zone -->
         <div class="form-row">
-          <label>Your Video <span class="optional">— required</span></label>
+          <label>Your Photo or Video <span class="optional">— required</span></label>
           <div class="drop-zone" id="drop-zone">
-            <input type="file" id="video-input" accept=".mp4,.mov,video/mp4,video/quicktime">
+            <input type="file" id="video-input" accept=".mp4,.mov,.jpg,.jpeg,.png,.heic,video/mp4,video/quicktime,image/jpeg,image/png,image/heic">
             <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
               <polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/>
             </svg>
-            <div class="drop-label"><strong>Tap to choose a video</strong><br>or drag and drop here</div>
-            <div class="file-types">MP4 &bull; MOV &nbsp;&middot;&nbsp; Max 500MB</div>
+            <div class="drop-label">
+              <!-- Desktop -->
+              <span class="drop-label-desktop"><strong>Tap to choose a photo or video</strong><br>or drag and drop here</span>
+              <!-- Mobile — no drag and drop mention -->
+              <span class="drop-label-mobile"><strong>Tap to choose a photo or video</strong><br>from your camera roll or files</span>
+            </div>
+            <div class="file-types">MP4 &bull; MOV &bull; JPG &bull; PNG &nbsp;&middot;&nbsp; Max 500MB</div>
           </div>
+
+          <!-- File chosen display -->
           <div class="file-chosen" id="file-chosen">
             <svg class="file-chosen-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            <span class="file-chosen-name" id="file-name">filename.mp4</span>
+            <div class="file-chosen-info">
+              <span class="file-chosen-name" id="file-name">filename.mp4</span>
+              <span class="file-chosen-size" id="file-size"></span>
+            </div>
             <button type="button" class="file-chosen-remove" id="remove-file" aria-label="Remove file">&times;</button>
           </div>
-          <div class="field-error" id="video-error">Please select a video file (MP4 or MOV, max 500MB).</div>
+
+          <!-- File size warning (shown for large but under-limit files) -->
+          <div class="size-warning" id="size-warning">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="size-warning-text">Large file — upload may take a while on mobile. Consider trimming to under 2 minutes if possible.</span>
+          </div>
+
+          <div class="field-error" id="video-error">Please select a photo or video (MP4, MOV, JPG, PNG — max 500MB).</div>
         </div>
 
-        <!-- Name + Handle -->
-        <div class="form-row form-row-two">
-          <div>
-            <label>Your Name <span class="optional">— optional</span></label>
-            <input type="text" id="fan-name" placeholder="e.g. Jamie C.">
-          </div>
-          <div>
-            <label>Social Handle <span class="optional">— optional</span></label>
-            <input type="text" id="fan-handle" placeholder="@yourchoice">
-          </div>
-        </div>
-
-        <!-- Show Info -->
-        <div class="form-row form-row-two">
-          <div>
-            <label>Show Location <span class="optional">— optional</span></label>
-            <select id="show-location">
-              <option value="">Select a city…</option>
-              <option>Los Angeles, CA</option>
-              <option>New York, NY</option>
-              <option>Chicago, IL</option>
-              <option>London, UK</option>
-              <option>Berlin, DE</option>
-              <option>Sydney, AU</option>
-              <option>Toronto, CA</option>
-              <option>Other / I'm not sure</option>
-            </select>
-          </div>
-          <div>
-            <label>Show Date <span class="optional">— optional</span></label>
-            <input type="text" id="show-date" placeholder="e.g. Nov 12 2024">
-          </div>
+        <!-- Name only -->
+        <div class="form-row">
+          <label>Your Name <span class="optional">— optional</span></label>
+          <input type="text" id="fan-name" placeholder="e.g. Jamie C." autocomplete="name">
         </div>
 
         <!-- Notes -->
@@ -700,7 +767,8 @@
           </div>
         </div>
 
-        <div class="form-row" style="margin-top:1.5rem;">
+        <!-- Submit button (inline, always visible) -->
+        <div class="submit-row" id="submit-row">
           <button type="submit" class="btn-primary" id="submit-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Send It
@@ -734,6 +802,14 @@
     </div>
   </div>
 </section>
+
+<!-- ── STICKY MOBILE SUBMIT BAR ── -->
+<div class="sticky-submit-bar" id="sticky-submit-bar">
+  <button type="button" class="btn-primary" id="sticky-submit-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    Send It
+  </button>
+</div>
 
 <!-- ── HOW IT WORKS ── -->
 <section id="how">
@@ -788,13 +864,9 @@
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/+esm';
 
-  // ─────────────────────────────────────────────
-  // 🔧 PASTE YOUR SUPABASE CREDENTIALS HERE
-  // ─────────────────────────────────────────────
   const SUPABASE_URL = 'https://ooytkookykxkxxkejpde.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9veXRrb29reWt4a3h4a2VqcGRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0MTc2NTIsImV4cCI6MjA4ODk5MzY1Mn0.2szUBYQ8e5BAk2AOAVM4Fg1QcBn-ohD8_AkdmiWhjE8';
-  const STORAGE_BUCKET = 'fan-videos';   // must match bucket name you create
-  // ─────────────────────────────────────────────
+  const STORAGE_BUCKET = 'fan-videos';
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -802,31 +874,56 @@
   const dropZone = document.getElementById('drop-zone');
   const fileInput = document.getElementById('video-input');
   const fileChosen = document.getElementById('file-chosen');
-  const fileName = document.getElementById('file-name');
+  const fileNameEl = document.getElementById('file-name');
+  const fileSizeEl = document.getElementById('file-size');
   const removeFile = document.getElementById('remove-file');
   const videoError = document.getElementById('video-error');
+  const sizeWarning = document.getElementById('size-warning');
+  const sizeWarningText = document.getElementById('size-warning-text');
 
-  const ALLOWED_TYPES = ['video/mp4', 'video/quicktime'];
+  const ALLOWED_TYPES = ['video/mp4', 'video/quicktime', 'image/jpeg', 'image/png', 'image/heic'];
   const MAX_SIZE_MB = 500;
+  const WARN_SIZE_MB = 100; // show warning above this
   let selectedFile = null;
+
+  function formatFileSize(bytes) {
+    if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(0) + ' MB';
+    return (bytes / 1024).toFixed(0) + ' KB';
+  }
 
   function setFile(file) {
     if (!file) return;
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      videoError.textContent = 'Only MP4 or MOV files are supported.';
-      videoError.classList.add('visible');
-      selectedFile = null;
-      return;
-    }
-    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-      videoError.textContent = `File too large — max is ${MAX_SIZE_MB}MB.`;
-      videoError.classList.add('visible');
-      selectedFile = null;
-      return;
-    }
+
+    sizeWarning.classList.remove('visible');
     videoError.classList.remove('visible');
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      videoError.textContent = 'Only MP4, MOV, JPG, or PNG files are supported.';
+      videoError.classList.add('visible');
+      selectedFile = null;
+      return;
+    }
+
+    const sizeMB = file.size / (1024 * 1024);
+
+    if (sizeMB > MAX_SIZE_MB) {
+      videoError.textContent = `File is ${formatFileSize(file.size)} — max allowed is ${MAX_SIZE_MB}MB. Please trim or compress your video first.`;
+      videoError.classList.add('visible');
+      selectedFile = null;
+      fileChosen.classList.remove('visible');
+      return;
+    }
+
+    // Show warning for large (but allowed) files
+    if (sizeMB > WARN_SIZE_MB) {
+      sizeWarningText.textContent = `This file is ${formatFileSize(file.size)}. It'll upload fine, but may take a few minutes on mobile data — keep the screen open until it's done.`;
+      sizeWarning.classList.add('visible');
+    }
+
     selectedFile = file;
-    fileName.textContent = file.name;
+    fileNameEl.textContent = file.name;
+    fileSizeEl.textContent = formatFileSize(file.size);
     fileChosen.classList.add('visible');
   }
 
@@ -850,7 +947,35 @@
     fileInput.value = '';
     selectedFile = null;
     fileChosen.classList.remove('visible');
-    fileName.textContent = '';
+    sizeWarning.classList.remove('visible');
+    fileNameEl.textContent = '';
+    fileSizeEl.textContent = '';
+  });
+
+  // ── STICKY MOBILE SUBMIT ──
+  const stickyBar = document.getElementById('sticky-submit-bar');
+  const stickyBtn = document.getElementById('sticky-submit-btn');
+  const submitRow = document.getElementById('submit-row');
+
+  // Show sticky bar when upload section is in view on mobile
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (window.innerWidth <= 600) {
+        if (entry.isIntersecting) {
+          stickyBar.classList.add('visible');
+        } else {
+          stickyBar.classList.remove('visible');
+        }
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const uploadSection = document.getElementById('upload');
+  if (uploadSection) observer.observe(uploadSection);
+
+  // Sticky button triggers the real form submit
+  stickyBtn.addEventListener('click', () => {
+    document.getElementById('upload-form').requestSubmit();
   });
 
   // ── FORM SUBMISSION ──
@@ -861,6 +986,17 @@
   const progressPct = document.getElementById('progress-pct');
   const progressStatus = document.getElementById('progress-status');
   const thankYou = document.getElementById('thank-you');
+
+  function setSubmitting(on) {
+    submitBtn.disabled = on;
+    submitBtn.style.opacity = on ? '0.5' : '1';
+    stickyBtn.disabled = on;
+    stickyBtn.style.opacity = on ? '0.5' : '1';
+    if (on) {
+      submitBtn.textContent = 'Uploading…';
+      stickyBtn.textContent = 'Uploading…';
+    }
+  }
 
   form.addEventListener('submit', async e => {
     e.preventDefault();
@@ -883,18 +1019,15 @@
 
     if (!valid) return;
 
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = '0.5';
+    setSubmitting(true);
     progressWrap.classList.add('active');
 
     try {
-      // ── 1. Upload video to Supabase Storage ──
       progressStatus.textContent = 'Uploading video…';
 
       const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
       const storagePath = `submissions/${Date.now()}_${safeName}`;
 
-      // Animate progress bar while upload runs
       let progressInterval = setInterval(() => {
         const current = parseFloat(progressFill.style.width) || 0;
         if (current < 85) {
@@ -917,35 +1050,31 @@
       progressFill.style.width = '90%';
       progressPct.textContent = '90%';
 
-      // ── 2. Get public URL ──
       const { data: urlData } = supabase.storage
         .from(STORAGE_BUCKET)
         .getPublicUrl(storagePath);
       const publicUrl = urlData.publicUrl;
 
-      // ── 3. Insert metadata row into `submissions` table ──
       progressStatus.textContent = 'Saving details…';
       progressFill.style.width = '95%';
       progressPct.textContent = '95%';
 
       const { error: dbError } = await supabase.from('submissions').insert({
         fan_name:      document.getElementById('fan-name').value.trim() || null,
-        fan_handle:    document.getElementById('fan-handle').value.trim() || null,
-        show_location: document.getElementById('show-location').value || null,
-        show_date:     document.getElementById('show-date').value.trim() || null,
         notes:         document.getElementById('fan-notes').value.trim() || null,
         video_path:    storagePath,
         video_url:     publicUrl,
-        status:        'pending',  // moderation queue default
+        status:        'pending',
         consented:     true,
       });
 
       if (dbError) throw dbError;
 
-      // ── 4. Done ──
       progressFill.style.width = '100%';
       progressPct.textContent = '100%';
       progressStatus.textContent = 'Done!';
+
+      stickyBar.classList.remove('visible');
 
       setTimeout(() => {
         form.style.display = 'none';
@@ -955,10 +1084,8 @@
     } catch (err) {
       console.error('Submission error:', err);
       progressWrap.classList.remove('active');
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '1';
+      setSubmitting(false);
 
-      // Show inline error
       let errBox = document.getElementById('submit-error');
       if (!errBox) {
         errBox = document.createElement('div');
