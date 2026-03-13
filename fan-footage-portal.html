@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fan Footage — Submit Your Clip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --deep: #0d0d0d;
+    --card: #111111;
+    --border: #1e1e1e;
+    --border-lit: #2e2e2e;
+    --red: #e8291c;
+    --red-dim: #b01f15;
+    --amber: #f5a623;
+    --white: #f0ece4;
+    --muted: #6b6560;
+    --text: #c8c2ba;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem 1.5rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 20%, rgba(232,41,28,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 20% 80%, rgba(245,166,35,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 80% 70%, rgba(232,41,28,0.06) 0%, transparent 50%);
+    z-index: 0;
+  }
+
+  /* Spotlight beams */
+  .beams {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .beam {
+    position: absolute;
+    top: -10%;
+    width: 1px;
+    height: 85%;
+    background: linear-gradient(180deg, rgba(232,41,28,0.5) 0%, rgba(232,41,28,0.08) 60%, transparent 100%);
+    transform-origin: top center;
+    animation: swayBeam 8s ease-in-out infinite;
+  }
+  .beam:nth-child(1) { left: 20%; animation-delay: 0s; transform: rotate(-12deg); opacity: 0.5; }
+  .beam:nth-child(2) { left: 50%; animation-delay: -3s; transform: rotate(0deg); opacity: 0.3; }
+  .beam:nth-child(3) { left: 80%; animation-delay: -5s; transform: rotate(10deg); opacity: 0.4; }
+  .beam::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -20px;
+    right: -20px;
+    height: 100%;
+    background: inherit;
+    filter: blur(12px);
+  }
+  @keyframes swayBeam {
+    0%, 100% { transform: rotate(var(--rot, -12deg)) scaleY(1); }
+    50% { transform: rotate(calc(var(--rot, -12deg) + 4deg)) scaleY(0.95); }
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 16vw, 10rem);
+    line-height: 0.9;
+    color: var(--white);
+    letter-spacing: 0.01em;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-title span { color: var(--red); }
+
+  .hero-sub {
+    font-size: clamp(0.9rem, 2.5vw, 1.05rem);
+    line-height: 1.7;
+    color: var(--muted);
+    margin-top: 1.5rem;
+    max-width: 460px;
+    margin-inline: auto;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-cta {
+    margin-top: 2.5rem;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--red);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.2rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    text-decoration: none;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  }
+  .btn-primary:hover { background: var(--red-dim); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary svg { width: 16px; height: 16px; }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    animation: fadeUp 1s 1s ease both;
+    z-index: 1;
+  }
+  .scroll-hint-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(var(--muted), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 0.8; transform: scaleY(1.1); }
+  }
+
+  /* ── SECTION LAYOUT ── */
+  section { padding: 5rem 1.5rem; }
+  .container { max-width: 760px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ── UPLOAD FORM ── */
+  #upload { background: var(--deep); }
+
+  .form-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2.5rem 2rem;
+    position: relative;
+  }
+  .form-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), var(--amber), transparent);
+  }
+
+  .form-row { margin-bottom: 1.5rem; }
+  .form-row:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+  label .optional {
+    font-weight: 300;
+    font-size: 0.7rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #3e3a36;
+    margin-left: 0.3rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea {
+    width: 100%;
+    background: var(--black);
+    border: 1px solid var(--border);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 300;
+    padding: 0.8rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--red); }
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+  select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6560' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+  select option { background: var(--deep); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .form-row-two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 480px) { .form-row-two { grid-template-columns: 1fr; } }
+
+  /* ── FILE DROP ZONE ── */
+  .drop-zone {
+    border: 1px dashed var(--border-lit);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--red);
+    background: rgba(232,41,28,0.04);
+  }
+  .drop-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .drop-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 1rem;
+    color: var(--muted);
+    transition: color 0.2s;
+  }
+  .drop-zone:hover .drop-icon { color: var(--red); }
+  .drop-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .drop-label strong { color: var(--text); font-weight: 400; }
+  .file-types {
+    font-size: 0.7rem;
+    color: #3e3a36;
+    margin-top: 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* File selected state */
+  .file-chosen {
+    display: none;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(232,41,28,0.06);
+    border: 1px solid rgba(232,41,28,0.2);
+    padding: 0.9rem 1rem;
+    margin-top: 0.8rem;
+  }
+  .file-chosen.visible { display: flex; }
+  .file-chosen-icon { color: var(--red); flex-shrink: 0; }
+  .file-chosen-name { font-size: 0.85rem; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-chosen-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.2rem; line-height: 1; padding: 0; }
+  .file-chosen-remove:hover { color: var(--red); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    display: none;
+    margin-top: 1.2rem;
+  }
+  .progress-wrap.active { display: block; }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .progress-status { color: var(--text); }
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--red), var(--amber));
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  /* ── CONSENT ── */
+  .consent-wrap {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    margin: 1.5rem 0;
+  }
+  .consent-wrap input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    accent-color: var(--red);
+    cursor: pointer;
+  }
+  .consent-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .consent-text a { color: var(--text); text-underline-offset: 3px; }
+
+  /* ── THANK YOU STATE ── */
+  .thank-you {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+  .thank-you.active { display: block; }
+  .thank-you-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(232,41,28,0.1);
+    border: 1px solid rgba(232,41,28,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: var(--red);
+  }
+  .thank-you h3 {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    color: var(--white);
+    margin-bottom: 0.8rem;
+    letter-spacing: 0.02em;
+  }
+  .thank-you p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; max-width: 360px; margin: 0 auto 2rem; }
+  .social-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid var(--border-lit);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.2rem;
+    text-decoration: none;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .social-link:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── HOW IT WORKS ── */
+  #how { border-top: 1px solid var(--border); }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2px; margin-top: 3rem; }
+  .step {
+    background: var(--card);
+    padding: 2rem 1.5rem;
+    position: relative;
+    border: 1px solid var(--border);
+    border-right: none;
+  }
+  .step:last-child { border-right: 1px solid var(--border); }
+  @media (max-width: 600px) {
+    .steps { grid-template-columns: 1fr; }
+    .step { border-right: 1px solid var(--border); border-bottom: none; }
+    .step:last-child { border-bottom: 1px solid var(--border); }
+  }
+  .step-num {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    color: var(--border-lit);
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+  .step h4 {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
+  }
+  .step p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+  .step-icon { color: var(--red); margin-bottom: 0.8rem; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .footer-brand {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--white);
+    letter-spacing: 0.05em;
+  }
+  .footer-brand span { color: var(--red); }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a {
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+  .footer-copy { font-size: 0.72rem; color: #3e3a36; width: 100%; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── POLICY MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border-lit);
+    max-width: 520px;
+    width: 100%;
+    padding: 2.5rem;
+    margin: auto;
+    position: relative;
+    animation: fadeUp 0.25s ease both;
+  }
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), var(--amber), transparent);
+  }
+  .modal h3 {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--white);
+    margin-bottom: 1.2rem;
+  }
+  .modal p { font-size: 0.85rem; color: var(--muted); line-height: 1.8; margin-bottom: 1rem; }
+  .modal p:last-child { margin-bottom: 0; }
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1.4rem;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--white); }
+
+  /* ── ERROR STATES ── */
+  .field-error {
+    font-size: 0.72rem;
+    color: var(--red);
+    margin-top: 0.4rem;
+    display: none;
+  }
+  .field-error.visible { display: block; }
+  input.error, select.error { border-color: var(--red) !important; }
+
+  /* ── ADMIN BADGE ── */
+  .admin-banner {
+    background: rgba(245,166,35,0.07);
+    border: 1px solid rgba(245,166,35,0.15);
+    border-left: 3px solid var(--amber);
+    padding: 0.9rem 1.2rem;
+    font-size: 0.8rem;
+    color: var(--amber);
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="beams">
+    <div class="beam"></div>
+    <div class="beam"></div>
+    <div class="beam"></div>
+  </div>
+  <div class="hero-content">
+    <p class="eyebrow">Community Archive</p>
+    <h1 class="hero-title">You <span>Were</span><br>There</h1>
+    <p class="hero-sub">Every show lives in the footage you captured. Share your clip and become part of the official fan archive.</p>
+    <div class="hero-cta">
+      <a href="#upload" class="btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Submit Your Video
+      </a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-hint-line"></div>
+  </div>
+</section>
+
+<!-- ── UPLOAD ── -->
+<section id="upload">
+  <div class="container">
+    <p class="section-label">Step Up</p>
+    <h2 class="section-title">Submit<br>Your Clip</h2>
+
+    <div class="admin-banner">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>All submissions are reviewed by the band before appearing in the public gallery. You'll be credited if your clip is selected.</span>
+    </div>
+
+    <div class="form-card" id="form-card">
+      <form id="upload-form" novalidate>
+
+        <!-- Drop Zone -->
+        <div class="form-row">
+          <label>Your Video <span class="optional">— required</span></label>
+          <div class="drop-zone" id="drop-zone">
+            <input type="file" id="video-input" accept=".mp4,.mov,video/mp4,video/quicktime">
+            <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <polygon points="10 9 15 12 10 15 10 9" fill="currentColor" stroke="none"/>
+            </svg>
+            <div class="drop-label"><strong>Tap to choose a video</strong><br>or drag and drop here</div>
+            <div class="file-types">MP4 &bull; MOV &nbsp;&middot;&nbsp; Max 500MB</div>
+          </div>
+          <div class="file-chosen" id="file-chosen">
+            <svg class="file-chosen-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span class="file-chosen-name" id="file-name">filename.mp4</span>
+            <button type="button" class="file-chosen-remove" id="remove-file" aria-label="Remove file">&times;</button>
+          </div>
+          <div class="field-error" id="video-error">Please select a video file (MP4 or MOV, max 500MB).</div>
+        </div>
+
+        <!-- Name + Handle -->
+        <div class="form-row form-row-two">
+          <div>
+            <label>Your Name <span class="optional">— optional</span></label>
+            <input type="text" id="fan-name" placeholder="e.g. Jamie C.">
+          </div>
+          <div>
+            <label>Social Handle <span class="optional">— optional</span></label>
+            <input type="text" id="fan-handle" placeholder="@yourchoice">
+          </div>
+        </div>
+
+        <!-- Show Info -->
+        <div class="form-row form-row-two">
+          <div>
+            <label>Show Location <span class="optional">— optional</span></label>
+            <select id="show-location">
+              <option value="">Select a city…</option>
+              <option>Los Angeles, CA</option>
+              <option>New York, NY</option>
+              <option>Chicago, IL</option>
+              <option>London, UK</option>
+              <option>Berlin, DE</option>
+              <option>Sydney, AU</option>
+              <option>Toronto, CA</option>
+              <option>Other / I'm not sure</option>
+            </select>
+          </div>
+          <div>
+            <label>Show Date <span class="optional">— optional</span></label>
+            <input type="text" id="show-date" placeholder="e.g. Nov 12 2024">
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-row">
+          <label>Anything to add? <span class="optional">— optional</span></label>
+          <textarea id="fan-notes" placeholder="Where you were standing, the song name, a funny story…"></textarea>
+        </div>
+
+        <!-- Consent -->
+        <div class="consent-wrap">
+          <input type="checkbox" id="consent" required>
+          <label for="consent" class="consent-text" style="text-transform:none;letter-spacing:0;font-size:0.8rem;">
+            I own this footage and grant the band permission to share it publicly. I have read the <a href="#" id="privacy-link">Privacy Notice</a>.
+          </label>
+        </div>
+        <div class="field-error" id="consent-error">You must agree to the terms before submitting.</div>
+
+        <!-- Progress -->
+        <div class="progress-wrap" id="progress-wrap">
+          <div class="progress-header">
+            <span class="progress-status" id="progress-status">Uploading…</span>
+            <span id="progress-pct">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:1.5rem;">
+          <button type="submit" class="btn-primary" id="submit-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Send It
+          </button>
+        </div>
+
+      </form>
+
+      <!-- Thank You -->
+      <div class="thank-you" id="thank-you">
+        <div class="thank-you-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>You Legend.</h3>
+        <p>Your clip is in the queue. The band reviews every submission — if yours makes the cut, it'll appear in the Fan Gallery and you'll be credited.</p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/></svg>
+            Twitter / X
+          </a>
+          <a href="#" class="social-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            Instagram
+          </a>
+          <a href="#" class="social-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.53V6.77a4.85 4.85 0 0 1-1.01-.08z"/></svg>
+            TikTok
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how">
+  <div class="container">
+    <p class="section-label">The Process</p>
+    <h2 class="section-title">How It<br>Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <svg class="step-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <h4>Upload Your Clip</h4>
+        <p>No account needed. Just your video and a couple of optional details about the show.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <svg class="step-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <h4>Band Reviews It</h4>
+        <p>Every clip goes through a quick moderation pass to keep the gallery quality high.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <svg class="step-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <h4>Go Live</h4>
+        <p>Approved clips appear in the Fan Gallery with your credit. Your moment, immortalized.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-brand">[BAND<span>.</span>]</div>
+  <nav class="footer-links">
+    <a href="#" id="footer-privacy">Privacy</a>
+    <a href="#upload">Submit</a>
+    <a href="#">Gallery</a>
+  </nav>
+  <p class="footer-copy">&copy; 2025 [Band Name]. Fan submissions reviewed prior to publication.</p>
+</footer>
+
+<!-- ── PRIVACY MODAL ── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+    <h3>Privacy Notice</h3>
+    <p>When you submit a video, we collect your name/social handle (if provided), the show details you enter, and the video file itself. This information is used solely to credit your submission and curate the fan gallery.</p>
+    <p>We do not sell your data. Your name and handle are displayed only if your clip is approved and you have provided them. You may request removal of your submission at any time by contacting us.</p>
+    <p>Video files are stored securely on third-party cloud storage (e.g., Cloudinary or AWS S3). We retain footage for as long as the fan archive is active.</p>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  // ─────────────────────────────────────────────
+  // 🔧 PASTE YOUR SUPABASE CREDENTIALS HERE
+  // ─────────────────────────────────────────────
+  const SUPABASE_URL = 'https://ooytkookykxkxxxkejpde.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_IFiE6bjI08NlBduC9OYkzQ_0ek48Igx';
+  const STORAGE_BUCKET = 'fan-videos';   // must match bucket name you create
+  // ─────────────────────────────────────────────
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ── FILE HANDLING ──
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('video-input');
+  const fileChosen = document.getElementById('file-chosen');
+  const fileName = document.getElementById('file-name');
+  const removeFile = document.getElementById('remove-file');
+  const videoError = document.getElementById('video-error');
+
+  const ALLOWED_TYPES = ['video/mp4', 'video/quicktime'];
+  const MAX_SIZE_MB = 500;
+  let selectedFile = null;
+
+  function setFile(file) {
+    if (!file) return;
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      videoError.textContent = 'Only MP4 or MOV files are supported.';
+      videoError.classList.add('visible');
+      selectedFile = null;
+      return;
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      videoError.textContent = `File too large — max is ${MAX_SIZE_MB}MB.`;
+      videoError.classList.add('visible');
+      selectedFile = null;
+      return;
+    }
+    videoError.classList.remove('visible');
+    selectedFile = file;
+    fileName.textContent = file.name;
+    fileChosen.classList.add('visible');
+  }
+
+  fileInput.addEventListener('change', e => setFile(e.target.files[0]));
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      setFile(file);
+    }
+  });
+
+  removeFile.addEventListener('click', () => {
+    fileInput.value = '';
+    selectedFile = null;
+    fileChosen.classList.remove('visible');
+    fileName.textContent = '';
+  });
+
+  // ── FORM SUBMISSION ──
+  const form = document.getElementById('upload-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const progressWrap = document.getElementById('progress-wrap');
+  const progressFill = document.getElementById('progress-fill');
+  const progressPct = document.getElementById('progress-pct');
+  const progressStatus = document.getElementById('progress-status');
+  const thankYou = document.getElementById('thank-you');
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    let valid = true;
+
+    if (!selectedFile) {
+      videoError.textContent = 'Please select a video file (MP4 or MOV, max 500MB).';
+      videoError.classList.add('visible');
+      valid = false;
+    }
+
+    const consent = document.getElementById('consent');
+    const consentError = document.getElementById('consent-error');
+    if (!consent.checked) {
+      consentError.classList.add('visible');
+      valid = false;
+    } else {
+      consentError.classList.remove('visible');
+    }
+
+    if (!valid) return;
+
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.5';
+    progressWrap.classList.add('active');
+
+    try {
+      // ── 1. Upload video to Supabase Storage ──
+      progressStatus.textContent = 'Uploading video…';
+
+      // Unique filename: timestamp + sanitised original name
+      const ext = selectedFile.name.split('.').pop();
+      const safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const storagePath = `submissions/${Date.now()}_${safeName}`;
+
+      // XMLHttpRequest so we get real upload progress
+      const signedUpload = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .createSignedUploadUrl(storagePath);
+
+      if (signedUpload.error) throw signedUpload.error;
+      const { signedUrl, token } = signedUpload.data;
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', signedUrl);
+        xhr.setRequestHeader('Content-Type', selectedFile.type);
+        xhr.setRequestHeader('x-upsert', 'false');
+
+        xhr.upload.addEventListener('progress', ev => {
+          if (ev.lengthComputable) {
+            const pct = Math.round((ev.loaded / ev.total) * 90); // reserve 10% for DB insert
+            progressFill.style.width = pct + '%';
+            progressPct.textContent = pct + '%';
+          }
+        });
+
+        xhr.addEventListener('load', () => xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`)));
+        xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
+        xhr.send(selectedFile);
+      });
+
+      // ── 2. Get public URL ──
+      const { data: urlData } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(storagePath);
+      const publicUrl = urlData.publicUrl;
+
+      // ── 3. Insert metadata row into `submissions` table ──
+      progressStatus.textContent = 'Saving details…';
+      progressFill.style.width = '95%';
+      progressPct.textContent = '95%';
+
+      const { error: dbError } = await supabase.from('submissions').insert({
+        fan_name:      document.getElementById('fan-name').value.trim() || null,
+        fan_handle:    document.getElementById('fan-handle').value.trim() || null,
+        show_location: document.getElementById('show-location').value || null,
+        show_date:     document.getElementById('show-date').value.trim() || null,
+        notes:         document.getElementById('fan-notes').value.trim() || null,
+        video_path:    storagePath,
+        video_url:     publicUrl,
+        status:        'pending',  // moderation queue default
+        consented:     true,
+      });
+
+      if (dbError) throw dbError;
+
+      // ── 4. Done ──
+      progressFill.style.width = '100%';
+      progressPct.textContent = '100%';
+      progressStatus.textContent = 'Done!';
+
+      setTimeout(() => {
+        form.style.display = 'none';
+        thankYou.classList.add('active');
+      }, 600);
+
+    } catch (err) {
+      console.error('Submission error:', err);
+      progressWrap.classList.remove('active');
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+
+      // Show inline error
+      let errBox = document.getElementById('submit-error');
+      if (!errBox) {
+        errBox = document.createElement('div');
+        errBox.id = 'submit-error';
+        errBox.style.cssText = 'margin-top:1rem;padding:0.9rem 1rem;background:rgba(232,41,28,0.08);border:1px solid rgba(232,41,28,0.3);color:#e8291c;font-size:0.82rem;line-height:1.6;';
+        submitBtn.parentNode.insertBefore(errBox, submitBtn.nextSibling);
+      }
+      errBox.textContent = `⚠ Upload failed: ${err.message}. Please try again or refresh the page.`;
+    }
+  });
+
+  document.getElementById('consent').addEventListener('change', () => {
+    document.getElementById('consent-error').classList.remove('visible');
+  });
+
+  // ── PRIVACY MODAL ──
+  function openModal() { document.getElementById('modal').classList.add('open'); }
+  function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+  document.getElementById('privacy-link').addEventListener('click', e => { e.preventDefault(); openModal(); });
+  document.getElementById('footer-privacy').addEventListener('click', e => { e.preventDefault(); openModal(); });
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal')) closeModal();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
